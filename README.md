@@ -6,7 +6,7 @@ Objetivo do trabalho: Implementação de Servidores Replicados usando Filas MQTT
 - Crate: Mosquitto-Client (É necessário instalar a biblioteca lib-mosquitto-dev no Ubuntu)
 - Broker: Mosquitto (Versão 2.0.10, encontramos alguns problemas com versões superiores a 2.0.12)
 
-Etapa inicial: Testar a linguagem e biblioteca escolhidas através de uma aplicação exemplo.
+Etapa inicial: Testar a linguagem e biblioteca escolhidas através de uma aplicação exemplo. ✓
 
 Discutir arquiterura em baixo nível:
 
