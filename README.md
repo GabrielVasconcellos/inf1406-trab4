@@ -41,6 +41,6 @@ Explicar solução encontrada para a sincronização entre um servidor novo e su
 
 Dúvidas:
 
-O que acontece quando dois servidores falham?
-Seria possível dividir a tarefa de atualizar um servidor novo por todos os servidores?
-É o monitor que deve criar servidores novos após detectar falhas?
+- O que acontece quando dois servidores falham?
+- Seria possível dividir a tarefa de atualizar um servidor novo por todos os servidores?
+- É o monitor que deve criar servidores novos após detectar falhas?
