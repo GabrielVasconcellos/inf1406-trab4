@@ -8,6 +8,6 @@ Objetivo do trabalho: Implementação de Servidores Replicados usando Filas MQTT
 
 Etapa inicial: Testar a linguagem e biblioteca escolhidas através de uma aplicação exemplo. ✓
 
-Discutir arquiterura em baixo nível:
+Discutir arquiterura em baixo nível ✖
 
-Explicar solução encontrada para a sincronização entre um servidor novo e substituto:
+Explicar solução encontrada para a sincronização entre um servidor novo e substituto ✖
