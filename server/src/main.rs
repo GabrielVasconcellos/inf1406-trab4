@@ -1,10 +1,12 @@
 use mosquitto_client::Mosquitto;
+use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::env;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
-use serde_json::Value;
+use std::thread::sleep;
+use std::time::Duration;
 
 fn get_hash(key: &String, n: i32) -> i32 {
     let mut sum: i32 = 0;
@@ -28,7 +30,7 @@ fn handle_request(
         Receiver<(String, serde_json::Value)>,
     ) = mpsc::channel();
 
-    let v:Value = serde_json::from_str(&req).unwrap();
+    let v: Value = serde_json::from_str(&req).unwrap();
 
     let is_target_server = if id == get_hash(&v["chave"].to_string(), n) {
         true
@@ -68,7 +70,7 @@ fn main() -> Result<(), mosquitto_client::Error> {
                     None => format!("valor {} inserido", v["novovalor"]),
                 };
                 ty.send((value, v)).unwrap();
-            } else if v["tipomsg"] == "query" && is_query_server {
+            } else if is_query_server {
                 let hm = hashmap.clone();
                 let value = match hm.get(&v["chave"].to_string()) {
                     Some(val) => val,
@@ -97,11 +99,18 @@ fn main() -> Result<(), mosquitto_client::Error> {
         data.push(msg.text().to_string());
     });
 
+    thread::spawn(move || loop {
+        let heartbeat = json!({ "idServ": id });
+        m.publish(
+            "inf1406-monitor",
+            heartbeat.to_string().as_bytes(),
+            1,
+            false,
+        );
+        sleep(Duration::from_millis(1000));
+    });
+
     m.loop_until_disconnect(200)?;
 
-    // println!("LOG:");
-    // for msg in &mc.data {
-    //     println!("{}", msg);
-    // }
     Ok(())
 }
