@@ -1,8 +1,14 @@
 use mosquitto_client::Mosquitto;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::process::Command;
 use std::time::{Duration, Instant};
 use std::{env, thread};
+
+macro_rules! heartbeat_period {
+    () => {
+        100
+    };
+}
 
 fn monitor(n: usize) {
     let m = Mosquitto::new("monitor");
@@ -15,30 +21,30 @@ fn monitor(n: usize) {
 
     let mut mc = m.callbacks(Vec::new());
 
-    let mut timeouts: Vec<Instant> = Vec::with_capacity(n);
-
-    for mut t in timeouts {
-        t = Instant::now();
+    for _i in 0..n {
+        mc.data.push(Instant::now());
     }
 
-    loop {
-        mc.on_message(|data, msg| {
-            let heartbeat = serde_json::Value::from(msg.text());
+    mc.on_message(|data: &mut Vec<Instant>, msg| {
+        let heartbeat: Value = serde_json::from_str(msg.text()).unwrap();
+        let mut str = heartbeat["idServ"].to_string();
+        str.remove(0);
+        str.remove(str.len() - 1);
+        let i = (str).parse::<usize>().unwrap();
+        data[i] = Instant::now();
 
-            timeouts[i32::from(heartbeat["idServ"].to_string())] = Instant::now();
-        });
-
-        for (i, t) in timeouts.iter().enumerate() {
-            if t.duration_since(Instant::now()) > 1000 {
-                let req = json!({
-                   "tipomsg": "falhaserv",
-                    "idServ": i.to_string(),
-                    "vistoem": t
-                });
-                m.publish("inf1406-reqs", req.to_string().as_bytes(), 1, false);
-            }
+        let t = data[(i + 1) % n];
+        if Instant::now().duration_since(t) > Duration::from_millis(10 * heartbeat_period!()) {
+            let req = json!({
+               "tipomsg": "falhaserv",
+                "idServ": i.to_string(),
+                "vistoem": t.elapsed().as_millis().to_string()
+            });
+            m.publish("inf1406-reqs", req.to_string().as_bytes(), 1, false);
         }
-    }
+    });
+
+    m.loop_until_disconnect(200);
 }
 
 fn main() {
@@ -54,6 +60,7 @@ fn main() {
         let child = Command::new("src/server")
             .arg(i.to_string())
             .arg(server_cnt.to_string())
+            .arg(heartbeat_period!().to_string())
             .spawn()
             .expect("failed to execute child");
 
