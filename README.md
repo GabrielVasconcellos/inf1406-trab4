@@ -40,8 +40,7 @@ Funcionamento do monitor:
 
 Explicar solução encontrada para a sincronização entre um servidor novo e substituto: Enquanto o servidor novo não recebe o HashMap atualizado do servidor substituto, ele não pode atender requests. Assim que o servidor substituto completar o envio, o servidor novo deverá publicar no tópico inf1406-reqs uma mensagem para informar que está pronto para receber suas requests. Ao receber esta mensagem, o servidor substituto para de responder as requests do servidor novo.
 
-Dúvidas:
+Observações:
 
-- O que acontece quando dois servidores falham?
-- Seria possível dividir a tarefa de atualizar um servidor novo por todos os servidores?
-- É o monitor que deve criar servidores novos após detectar falhas?
+- Servidores consecutivos não podem falhar.
+- O monitor será o responsável por disparar os novos processos, passando argumentos para identificá-los como novos.
